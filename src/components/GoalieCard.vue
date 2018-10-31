@@ -11,19 +11,18 @@
 export default {
     name: 'GoalieCard',
     props: {
-        id: Number,
+        id: String,
         content: String,
     },
     mounted() {
-        this.$el.querySelector('.subtitle').innerText = this.card.content
+        this.$el.querySelector('.subtitle').innerText = this.content
     },
     methods: {
         update(event) {
             this.$emit('update', event.target.innerText)
         },
-        deleteCard(card) {
-            var idx = this.cards.indexOf(card)
-            this.cards.splice(idx,1)
+        deleteCard(id) {
+            this.$emit('deleteCard', id)
         }
     }  
 }
