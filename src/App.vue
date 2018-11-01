@@ -8,6 +8,8 @@
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @connectCards="connectCards"
+                @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
@@ -19,6 +21,8 @@
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @connectCards="connectCards"
+                @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
@@ -30,6 +34,8 @@
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @connectCards="connectCards"
+                @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
@@ -41,6 +47,8 @@
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @connectCards="connectCards"
+                @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
@@ -57,21 +65,9 @@ export default {
     },
     data() {
         return {
-            columns: [
-                { id: 1, type: 'Goal' },
-                { id: 2, type: 'Target group' },
-                { id: 3, type: 'User goal' },
-                { id: 4, type: 'Action' }
-            ],
-            cards: [
-                { 
-                    id: 1, 
-                    column: 1,
-                    content: 'Change me',
-                    weight: 0,
-                    connectsTo: []
-                }
-            ]
+            cards: [],
+            from: null,
+            to: null
         }
     },
     computed: {
@@ -87,6 +83,9 @@ export default {
         actions() {
             return this.cards.filter(card => card.column == 4)
         },
+        isValidConnection() {
+            return (this.from && this.to && (this.from !== this.to))
+        }
     },
     mounted() {
         if (localStorage.getItem('goalie_cards')) {
@@ -109,7 +108,39 @@ export default {
                 connectsTo: [],
             })
         },
+        prepareConnectCard(data) {
+            if (data.from) {
+                this.from = data.from
+            } else if (data.to) {
+                this.to = data.to
+            }
+        },
+        connectCards() {
+            if (this.isValidConnection) {
+                let existingFromCardConnections = this.cards.filter(card => card.id === this.from)[0].connectsTo
+                let existingToCardConnections = this.cards.filter(card => card.id === this.to)[0].connectsTo
+
+                let indexInFromCardArr = existingFromCardConnections.findIndex(card => card === this.to)
+                let indexInToCardArr = existingToCardConnections.findIndex(card => card === this.from)
+
+                if (indexInFromCardArr > -1) {
+                    existingToCardConnections.splice(indexInFromCardArr, 1)
+                } else {
+                    existingFromCardConnections.push(this.to)
+                }
+
+                if (indexInToCardArr > -1) {
+                    existingFromCardConnections.splice(indexInToCardArr, 1)
+                } else {
+                    existingToCardConnections.push(this.from)
+                }
+
+                this.cards.filter(card => card.id === this.from)[0].connectsTo = existingFromCardConnections
+                this.cards.filter(card => card.id === this.to)[0].connectsTo = existingToCardConnections
+            }
+        },
         deleteCard(id) {
+            // TODO: Remove all connections before deleting card
             var idx = this.cards.findIndex(card => card.id === id)
             this.cards.splice(idx, 1)
         }
@@ -132,5 +163,20 @@ export default {
 
 .card + .card {
 	margin-top: 20px  
+}
+
+.drag, .drop {
+    position: relative;
+}
+
+.drag {
+    position: absolute;
+    top: 0;
+    padding: 3px;
+    cursor: move;
+}
+
+.drop {
+    background: #eee;
 }
 </style>
