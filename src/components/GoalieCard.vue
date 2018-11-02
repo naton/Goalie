@@ -1,5 +1,8 @@
 <template>
-    <div class="card" :title="id">
+    <div class="card"
+        :id="id"
+        @mouseenter="handleHover({id: id, top: top, left: left, width: width, height: height})"
+        @mouseleave="handleHover">
         <drop class="drop"
             :class="{ over }"
             @dragenter="to = id; handleEnter(to)"
@@ -27,8 +30,6 @@ export default {
         id: String,
         column: Number,
         content: String,
-        weight: Number,
-        connectsTo: Array,
     },
     components: {
         Drag,
@@ -37,12 +38,18 @@ export default {
     data() {
         return {
             over: false,
-            from: null,
-            to: null
+            width: null,
+            height: null,
+            top: null,
+            left: null,
         }
     },
     mounted() {
         this.$el.querySelector('.subtitle').innerText = this.content
+        this.width = this.$el.offsetWidth
+        this.height = this.$el.offsetHeight
+        this.top = this.$el.offsetTop
+        this.left = this.$el.offsetLeft
     },
     methods: {
         handleStart(id) {
@@ -55,12 +62,15 @@ export default {
             this.over = false
             this.$emit('connectCards')
         },
+        handleHover(data) {
+            this.$emit('hoverCard', data)
+        },
         update(event) {
             this.$emit('update', event.target.innerText)
         },
         deleteCard(id) {
             this.$emit('deleteCard', id)
-        }
+        },
     }  
 }
 </script>

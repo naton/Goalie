@@ -1,52 +1,61 @@
 <template>
     <div id="app" class="columns">
+        <svg id="canvas">
+            <g v-for="card in hoveredConnectsTo" :key="card.card">
+              <line :x1="card.x1" :y1="card.y1" :x2="card.x2" :y2="card.y2" stroke="black" stroke-width="2" />
+            </g>
+        </svg>
         <div class="column">
-            <h2 class="title">Goal <button @click="addCard(1)" class="button is-pulled-right">Add Goal</button></h2>
+            <h2 class="title">Goals <button @click="addCard(1)" class="button is-pulled-right">Add Goal</button></h2>
             <GoalieCard
                 v-for="card in goals"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @hoverCard="hoverCard"
                 @connectCards="connectCards"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
         <div class="column">
-            <h2 class="title">Target group <button @click="addCard(2)" class="button is-pulled-right">Add Target group</button></h2>
+            <h2 class="title">Users <button @click="addCard(2)" class="button is-pulled-right">Add User</button></h2>
             <GoalieCard
-                v-for="card in target_groups"
+                v-for="card in users"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @hoverCard="hoverCard"
                 @connectCards="connectCards"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
         <div class="column">
-            <h2 class="title">User goal <button @click="addCard(3)" class="button is-pulled-right">Add User goal</button></h2>
+            <h2 class="title">User goals <button @click="addCard(3)" class="button is-pulled-right">Add User goal</button></h2>
             <GoalieCard
                 v-for="card in user_goals"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @hoverCard="hoverCard"
                 @connectCards="connectCards"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
         </div>
         <div class="column">
-            <h2 class="title">Action <button @click="addCard(4)" class="button is-pulled-right">Add Action</button></h2>
+            <h2 class="title">Actions <button @click="addCard(4)" class="button is-pulled-right">Add Action</button></h2>
             <GoalieCard
                 v-for="card in actions"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
                 @update="card.content = $event"
+                @hoverCard="hoverCard"
                 @connectCards="connectCards"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
@@ -67,25 +76,34 @@ export default {
         return {
             cards: [],
             from: null,
-            to: null
+            to: null,
+            hoveredConnectsTo: [],
+            x1: null,
+            x2: null,
+            y1: null,
+            y2: null
         }
     },
     computed: {
         goals() {
-            return this.cards.filter(card => card.column == 1)
+            return this.cards.filter(card => card.column === 1)
         },
-        target_groups() {
-            return this.cards.filter(card => card.column == 2)
+        users() {
+            return this.cards.filter(card => card.column === 2)
         },
         user_goals() {
-            return this.cards.filter(card => card.column == 3)
+            return this.cards.filter(card => card.column === 3)
         },
         actions() {
-            return this.cards.filter(card => card.column == 4)
+            return this.cards.filter(card => card.column === 4)
         },
         isValidConnection() {
             return (this.from && this.to && (this.from !== this.to))
-        }
+        },
+        // TODO:
+        // calculateWeight() {
+        //     return this.connectsTo.length
+        // }
     },
     mounted() {
         if (localStorage.getItem('goalie_cards')) {
@@ -103,10 +121,13 @@ export default {
             this.cards.push({
                 id: this.guidGenerator(),
                 column: id,
-                content: 'Change me',
-                weight: 0,
+                content: 'Edit me…',
+                weight: 0, // TODO: this.calculateWeight,
                 connectsTo: [],
             })
+        },
+        getCardConnections(id) {
+            return this.cards.filter(card => card.id === id)[0].connectsTo
         },
         prepareConnectCard(data) {
             if (data.from) {
@@ -117,6 +138,7 @@ export default {
         },
         connectCards() {
             if (this.isValidConnection) {
+                // TODO: Fix connectsTo array..
                 let existingFromCardConnections = this.cards.filter(card => card.id === this.from)[0].connectsTo
                 let existingToCardConnections = this.cards.filter(card => card.id === this.to)[0].connectsTo
 
@@ -140,9 +162,43 @@ export default {
             }
         },
         deleteCard(id) {
-            // TODO: Remove all connections before deleting card
-            var idx = this.cards.findIndex(card => card.id === id)
-            this.cards.splice(idx, 1)
+            let thisIndex = this.cards.findIndex(card => card.id === id)
+            this.cards.splice(thisIndex, 1)
+
+            this.getCardConnections(id).forEach((id) => {
+                console.log(id)
+                thisIndex = this.cards.findIndex(card => card.id === id)
+                // TODO: Remove all connections before deleting card
+                // this.connectsTo(thisIndex, 1)
+            })
+
+        },
+        hoverCard(data) {
+            if (data.id) {
+                let refs = this.getCardConnections(data.id)
+                let x1 = data.left + (data.width / 2)
+                let y1 = data.top + (data.height / 2)
+                let x2 = null
+                let y2 = null
+                let arr = []
+                // TODO: Store original card/hovered card dimensions first, then draw from here to destinations
+                refs.forEach((id) => {
+                    var cardId = this.cards.filter(card => card.id === id)[0] ? this.cards.filter(card => card.id === id)[0].id : null
+                    var card
+                    if (cardId) {
+                        card = document.getElementById(this.cards.filter(card => card.id === id)[0].id)
+                        arr.push({
+                            x1: x1,
+                            y1: y1,
+                            x2: card.offsetLeft + (card.offsetWidth / 2),
+                            y2: card.offsetTop + (card.offsetHeight / 2)
+                        })
+                    }
+                })
+                this.hoveredConnectsTo = arr
+            } else {
+                this.hoveredConnectsTo = []
+            }
         }
     },
     watch: {
@@ -159,6 +215,16 @@ export default {
 <style>
 #app {
     padding: 20px;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 .card + .card {
