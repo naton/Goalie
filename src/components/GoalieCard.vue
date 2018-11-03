@@ -1,7 +1,7 @@
 <template>
     <div class="card"
         :id="id"
-        @mouseenter="handleHover({id: id, top: top, left: left, width: width, height: height})"
+        @mouseenter="handleHover({id: id, dimensions: dimensions})"
         @mouseleave="handleHover">
         <drop class="drop"
             :class="{ over }"
@@ -37,19 +37,21 @@ export default {
     },
     data() {
         return {
-            over: false,
-            width: null,
-            height: null,
-            top: null,
-            left: null,
+            over: false
+        }
+    },
+    computed: {
+        dimensions: function() {
+            return {
+                width: this.$el.offsetWidth,
+                height: this.$el.offsetHeight,
+                top: this.$el.offsetTop,
+                left: this.$el.offsetLeft,
+            }
         }
     },
     mounted() {
         this.$el.querySelector('.subtitle').innerText = this.content
-        this.width = this.$el.offsetWidth
-        this.height = this.$el.offsetHeight
-        this.top = this.$el.offsetTop
-        this.left = this.$el.offsetLeft
     },
     methods: {
         handleStart(id) {
@@ -76,8 +78,11 @@ export default {
 </script>
 
 <style>
+.card {
+    background: rgba(245, 245, 245, 0.75)
+}
+
 .drop.over {
-    border-color: #aaa;
-    background: #ccc;
+    background: rgba(255, 255, 235, 0.75)
 }
 </style>

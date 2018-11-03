@@ -1,9 +1,9 @@
 <template>
     <div id="app" class="columns">
         <svg id="canvas">
-            <g v-for="card in hoveredConnectsTo" :key="card.card">
-              <line :x1="card.x1" :y1="card.y1" :x2="card.x2" :y2="card.y2" stroke="black" stroke-width="2" />
-            </g>
+            <path stroke="black" stroke-width="2" fill="transparent"
+                v-for="pos in drawLinesTo"
+                :d="'M' + pos.x1 + ' ' + pos.y1 + ' C ' + (pos.x1 + 10) + ' ' + (pos.y1 + 10) + ', ' + (pos.x2 - 10) + ' ' + (pos.y2 - 10) + ', ' +  pos.x2 + ' ' + pos.y2" />
         </svg>
         <div class="column">
             <h2 class="title">Goals <button @click="addCard(1)" class="button is-pulled-right">Add Goal</button></h2>
@@ -14,7 +14,7 @@
                 :content="card.content"
                 @update="card.content = $event"
                 @hoverCard="hoverCard"
-                @connectCards="connectCards"
+                @connectCards="connectCards(card)"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
@@ -28,7 +28,7 @@
                 :content="card.content"
                 @update="card.content = $event"
                 @hoverCard="hoverCard"
-                @connectCards="connectCards"
+                @connectCards="connectCards(card)"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
@@ -42,7 +42,7 @@
                 :content="card.content"
                 @update="card.content = $event"
                 @hoverCard="hoverCard"
-                @connectCards="connectCards"
+                @connectCards="connectCards(card)"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
@@ -56,7 +56,7 @@
                 :content="card.content"
                 @update="card.content = $event"
                 @hoverCard="hoverCard"
-                @connectCards="connectCards"
+                @connectCards="connectCards(card)"
                 @prepareConnectCard="prepareConnectCard"
                 @deleteCard="deleteCard"
             ></GoalieCard>
@@ -75,9 +75,10 @@ export default {
     data() {
         return {
             cards: [],
+            connections: [],
             from: null,
             to: null,
-            hoveredConnectsTo: [],
+            drawLinesTo: [],
             x1: null,
             x2: null,
             y1: null,
@@ -100,14 +101,11 @@ export default {
         isValidConnection() {
             return (this.from && this.to && (this.from !== this.to))
         },
-        // TODO:
-        // calculateWeight() {
-        //     return this.connectsTo.length
-        // }
     },
     mounted() {
-        if (localStorage.getItem('goalie_cards')) {
+        if (localStorage.getItem('goalie_cards') && localStorage.getItem('goalie_connections')) {
             this.cards = JSON.parse(localStorage.getItem('goalie_cards'));
+            this.connections = JSON.parse(localStorage.getItem('goalie_connections'));
         }
     },
     methods: {
@@ -122,12 +120,11 @@ export default {
                 id: this.guidGenerator(),
                 column: id,
                 content: 'Edit me…',
-                weight: 0, // TODO: this.calculateWeight,
-                connectsTo: [],
+                // TODO: weight: 0 - how to calculate and sort byt this?
             })
         },
         getCardConnections(id) {
-            return this.cards.filter(card => card.id === id)[0].connectsTo
+            return this.connections ? this.connections.filter(connection => connection.from === id) : []
         },
         prepareConnectCard(data) {
             if (data.from) {
@@ -136,68 +133,63 @@ export default {
                 this.to = data.to
             }
         },
-        connectCards() {
+        connectCards(card) {
+            let thisCard = this.from
+            let targetCard = this.to
+            let matches = this.connections.findIndex(connection => ((connection.from === thisCard) && (connection.to === targetCard)))
+            let matches2 = this.connections.findIndex(connection => ((connection.to === thisCard) && (connection.from === targetCard)))
+
             if (this.isValidConnection) {
-                // TODO: Fix connectsTo array..
-                let existingFromCardConnections = this.cards.filter(card => card.id === this.from)[0].connectsTo
-                let existingToCardConnections = this.cards.filter(card => card.id === this.to)[0].connectsTo
-
-                let indexInFromCardArr = existingFromCardConnections.findIndex(card => card === this.to)
-                let indexInToCardArr = existingToCardConnections.findIndex(card => card === this.from)
-
-                if (indexInFromCardArr > -1) {
-                    existingToCardConnections.splice(indexInFromCardArr, 1)
+                    console.log("connection before", this.connections)
+                if ((matches > -1) && (matches2 > -1)) {
+                    // Connection exists already, exclude from-to pair from (new) connections array
+                    this.connections.splice(matches, 1);
+                    this.connections.splice(matches2, 1);
                 } else {
-                    existingFromCardConnections.push(this.to)
+                    // Wasn't there, add connection both ways
+                    this.connections.push({from: thisCard, to: targetCard})
+                    this.connections.push({from: targetCard, to: thisCard})
                 }
-
-                if (indexInToCardArr > -1) {
-                    existingFromCardConnections.splice(indexInToCardArr, 1)
-                } else {
-                    existingToCardConnections.push(this.from)
-                }
-
-                this.cards.filter(card => card.id === this.from)[0].connectsTo = existingFromCardConnections
-                this.cards.filter(card => card.id === this.to)[0].connectsTo = existingToCardConnections
+                    console.log("connection after", this.connections)
             }
         },
         deleteCard(id) {
+            // Remove this card
             let thisIndex = this.cards.findIndex(card => card.id === id)
             this.cards.splice(thisIndex, 1)
 
-            this.getCardConnections(id).forEach((id) => {
-                console.log(id)
-                thisIndex = this.cards.findIndex(card => card.id === id)
-                // TODO: Remove all connections before deleting card
-                // this.connectsTo(thisIndex, 1)
-            })
-
+            // Remove all its connections
+            this.connections = this.connections.filter(cardPair => (cardPair.from !== id || cardPair.to !== id))
         },
         hoverCard(data) {
+            // Check if data is real data (contains an id) or not (otherwise it's an [e.g. mouseleave] event)
             if (data.id) {
-                let refs = this.getCardConnections(data.id)
-                let x1 = data.left + (data.width / 2)
-                let y1 = data.top + (data.height / 2)
+                let hoveredCardId = data.id
+                let refs = this.getCardConnections(hoveredCardId)
+                let x1 = data.dimensions.left + (data.dimensions.width / 2)
+                let y1 = data.dimensions.top + (data.dimensions.height / 2)
                 let x2 = null
                 let y2 = null
                 let arr = []
-                // TODO: Store original card/hovered card dimensions first, then draw from here to destinations
-                refs.forEach((id) => {
-                    var cardId = this.cards.filter(card => card.id === id)[0] ? this.cards.filter(card => card.id === id)[0].id : null
-                    var card
-                    if (cardId) {
-                        card = document.getElementById(this.cards.filter(card => card.id === id)[0].id)
+
+                refs.forEach(targetCard => {
+                    var targetCardId = targetCard.to
+
+                    if (targetCardId) {
+                        var cardDOM = document.getElementById(this.cards.filter(card => card.id === targetCardId)[0].id)
+
                         arr.push({
                             x1: x1,
                             y1: y1,
-                            x2: card.offsetLeft + (card.offsetWidth / 2),
-                            y2: card.offsetTop + (card.offsetHeight / 2)
+                            x2: cardDOM.offsetLeft + (cardDOM.offsetWidth / 2),
+                            y2: cardDOM.offsetTop + (cardDOM.offsetHeight / 2)
                         })
                     }
                 })
-                this.hoveredConnectsTo = arr
+
+                this.drawLinesTo = arr
             } else {
-                this.hoveredConnectsTo = []
+                this.drawLinesTo = []
             }
         }
     },
@@ -207,6 +199,11 @@ export default {
                 localStorage.setItem('goalie_cards', JSON.stringify(this.cards));
             },
             deep: true
+        },
+        connections: {
+            handler() {
+                localStorage.setItem('goalie_connections', JSON.stringify(this.connections));
+            }
         }
     }
 }
@@ -224,7 +221,7 @@ export default {
     pointer-events: none;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    opacity: 0.5;
 }
 
 .card + .card {
@@ -240,9 +237,5 @@ export default {
     top: 0;
     padding: 3px;
     cursor: move;
-}
-
-.drop {
-    background: #eee;
 }
 </style>
