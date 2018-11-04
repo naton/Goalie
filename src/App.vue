@@ -3,63 +3,64 @@
         <svg id="canvas">
             <path stroke="black" stroke-width="2" fill="transparent"
                 v-for="pos in drawLinesTo"
+                :key="pos.pos"
                 :d="'M' + pos.x1 + ' ' + pos.y1 + ' C ' + (pos.x1 + 10) + ' ' + (pos.y1 + 10) + ', ' + (pos.x2 - 10) + ' ' + (pos.y2 - 10) + ', ' +  pos.x2 + ' ' + pos.y2" />
         </svg>
         <div class="column">
             <h2 class="title">Goals <button @click="addCard(1)" class="button is-pulled-right">Add Goal</button></h2>
-            <GoalieCard
+            <goalie-card
                 v-for="card in goals"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
-                @update="card.content = $event"
-                @hoverCard="hoverCard"
-                @connectCards="connectCards(card)"
-                @prepareConnectCard="prepareConnectCard"
-                @deleteCard="deleteCard"
-            ></GoalieCard>
+                @update-content="card.content = $event"
+                @hover-card="hoverCard"
+                @connect-cards="connectCards(card)"
+                @prepare-connect-card="prepareConnectCard"
+                @delete-card="deleteCard"
+            ></goalie-card>
         </div>
         <div class="column">
             <h2 class="title">Users <button @click="addCard(2)" class="button is-pulled-right">Add User</button></h2>
-            <GoalieCard
+            <goalie-card
                 v-for="card in users"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
-                @update="card.content = $event"
-                @hoverCard="hoverCard"
-                @connectCards="connectCards(card)"
-                @prepareConnectCard="prepareConnectCard"
-                @deleteCard="deleteCard"
-            ></GoalieCard>
+                @update-content="card.content = $event"
+                @hover-card="hoverCard"
+                @connect-cards="connectCards(card)"
+                @prepare-connect-card="prepareConnectCard"
+                @delete-card="deleteCard"
+            ></goalie-card>
         </div>
         <div class="column">
             <h2 class="title">User goals <button @click="addCard(3)" class="button is-pulled-right">Add User goal</button></h2>
-            <GoalieCard
+            <goalie-card
                 v-for="card in user_goals"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
-                @update="card.content = $event"
-                @hoverCard="hoverCard"
-                @connectCards="connectCards(card)"
-                @prepareConnectCard="prepareConnectCard"
-                @deleteCard="deleteCard"
-            ></GoalieCard>
+                @update-content="card.content = $event"
+                @hover-card="hoverCard"
+                @connect-cards="connectCards(card)"
+                @prepare-connect-card="prepareConnectCard"
+                @delete-card="deleteCard"
+            ></goalie-card>
         </div>
         <div class="column">
             <h2 class="title">Actions <button @click="addCard(4)" class="button is-pulled-right">Add Action</button></h2>
-            <GoalieCard
+            <goalie-card
                 v-for="card in actions"
                 :key="card.id"
                 :id="card.id"
                 :content="card.content"
-                @update="card.content = $event"
-                @hoverCard="hoverCard"
-                @connectCards="connectCards(card)"
-                @prepareConnectCard="prepareConnectCard"
-                @deleteCard="deleteCard"
-            ></GoalieCard>
+                @update-content="card.content = $event"
+                @hover-card="hoverCard"
+                @connect-cards="connectCards(card)"
+                @prepare-connect-card="prepareConnectCard"
+                @delete-card="deleteCard"
+            ></goalie-card>
         </div>
     </div>
 </template>
@@ -79,10 +80,6 @@ export default {
             from: null,
             to: null,
             drawLinesTo: [],
-            x1: null,
-            x2: null,
-            y1: null,
-            y2: null
         }
     },
     computed: {

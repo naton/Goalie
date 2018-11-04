@@ -11,7 +11,7 @@
             @drop="handleDrop(to)">
             <div class="card-content">
                 <button class="delete is-pulled-right" @click="deleteCard(id)"></button>
-                <p class="subtitle" contenteditable="true" @input="update"></p>
+                <p class="subtitle" contenteditable="true" @input="updateContent"></p>
             </div>
             <drag class="drag"
                 :effect-allowed="['link']"
@@ -55,23 +55,23 @@ export default {
     },
     methods: {
         handleStart(id) {
-            this.$emit('prepareConnectCard', {from: id})
+            this.$emit('prepare-connect-card', {from: id})
         },
         handleEnter(id) {
-            this.$emit('prepareConnectCard', {to: id})
+            this.$emit('prepare-connect-card', {to: id})
         },
         handleDrop(id) {
             this.over = false
-            this.$emit('connectCards')
+            this.$emit('connect-cards')
         },
         handleHover(data) {
-            this.$emit('hoverCard', data)
+            this.$emit('hover-card', data)
         },
-        update(event) {
-            this.$emit('update', event.target.innerText)
+        updateContent(event) {
+            this.$emit('update-content', event.target.innerText)
         },
         deleteCard(id) {
-            this.$emit('deleteCard', id)
+            this.$emit('delete-card', id)
         },
     }  
 }
