@@ -120,7 +120,7 @@ export default {
     },
     methods: {
         guidGenerator() {
-            var S4 = function() {
+            let S4 = function() {
                 return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
             };
             return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
@@ -180,25 +180,26 @@ export default {
             // Check if data is real data (contains an id) or not (otherwise it's an [e.g. mouseleave] event)
             if (data.id) {
                 let hoveredCardId = data.id
+                let hoveredCardColumnDOM = document.getElementById(hoveredCardId).closest('.column')
                 let refs = this.getCardConnections(hoveredCardId)
                 let x1 = data.dimensions.left + (data.dimensions.width / 2)
-                let y1 = data.dimensions.top + (data.dimensions.height / 2)
-                let x2 = null
-                let y2 = null
+                let y1 = data.dimensions.top - hoveredCardColumnDOM.scrollTop + (data.dimensions.height / 2)
                 let arr = []
 
                 refs.forEach(targetCard => {
-                    var targetCardId = targetCard.to
+                    let targetCardId = targetCard.to
+                    let x2
+                    let y2
 
                     if (targetCardId) {
                         // TODO: Get rid of DOM sniffing here? Lookup card dimensions of each target card?
-                        var cardDOM = document.getElementById(this.cards.filter(card => card.id === targetCardId)[0].id) || app
+                        let targetCardDOM = document.getElementById(this.cards.filter(card => card.id === targetCardId)[0].id) || app
 
                         arr.push({
                             x1: x1,
                             y1: y1,
-                            x2: cardDOM.getBoundingClientRect().left + (cardDOM.offsetWidth / 2),
-                            y2: cardDOM.getBoundingClientRect().top + (cardDOM.offsetHeight / 2)
+                            x2: targetCardDOM.getBoundingClientRect().left + (targetCardDOM.offsetWidth / 2),
+                            y2: targetCardDOM.getBoundingClientRect().top - targetCardDOM.scrollTop + (targetCardDOM.offsetHeight / 2)
                         })
                     }
                 })
@@ -226,8 +227,10 @@ export default {
 </script>
 
 <style>
+@import "https://fonts.googleapis.com/css?family=Vesper+Libre";
+
 html {
-    background-color: #fff;
+    background-color: hsla(225, 35%, 85%, 1);
     font-size: 16px;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
@@ -241,6 +244,7 @@ html {
 }
 
 body {
+    padding: 0;
     color: #4a4a4a;
     font-weight: 400;
     font-size: 1rem;
@@ -261,6 +265,16 @@ h1, h2, h3 {
     width: 100%;
     height: 100%;
     opacity: 0.5;
+}
+
+#canvas path {
+    opacity: 0;
+    animation: fade-in 0.6s forwards 0.2s;
+}
+
+@-webkit-keyframes fade-in {
+    0% {opacity: 0;}
+    100% {opacity:1;}
 }
 
 .card-move {

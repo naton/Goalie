@@ -162,7 +162,7 @@ export default {
     float: right;
 }
 
-.drop.over {
+.drop.over .card__content {
     background: rgba(255, 255, 235, 1)
 }
 </style>

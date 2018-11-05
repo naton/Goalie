@@ -1,4 +1,5 @@
 <template>
+    <!-- section class="column" :scroll="handleScroll" -->
     <section class="column">
         <h1 class="column__title">{{ title }} <button @click="handleClick(id)" class="button float-right">{{ buttonText }}</button></h1>
         <slot></slot>
@@ -17,7 +18,16 @@ export default {
         handleClick(id) {
             this.$emit('add-card', id)
         },
-    }
+        // handleScroll() {
+        //     app.drawLinesTo = []
+        // }
+    },
+    // mounted () {
+    //     this.$el.addEventListener('scroll', this.handleScroll);
+    // },
+    // destroyed () {
+    //     this.$el.removeEventListener('scroll', this.handleScroll);
+    // }
 }
 </script>
 
@@ -28,19 +38,17 @@ export default {
 
 .column {
     position: relative;
-    height: 100vh;
     flex-basis: 0;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: auto;
+    height: 100vh;
 }
 
 .column__title {
     position: sticky;
     z-index: 1;
     top: 0;
-    margin: 0 -2px 2px;
-    padding: 10px 10px 5px;
-    background-color: #fff;
+    margin: 10px 10px 5px;
 }
 </style>
