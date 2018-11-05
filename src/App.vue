@@ -6,72 +6,78 @@
                 :key="pos.pos"
                 :d="'M' + pos.x1 + ' ' + pos.y1 + ' C ' + (pos.x1 + 10) + ' ' + (pos.y1 + 10) + ', ' + (pos.x2 - 10) + ' ' + (pos.y2 - 10) + ', ' +  pos.x2 + ' ' + pos.y2" />
         </svg>
-        <div class="column">
-            <h2 class="title">Goals <button @click="addCard(1)" class="button is-pulled-right">Add Goal</button></h2>
-            <goalie-card
-                v-for="card in goals"
-                :key="card.id"
-                :id="card.id"
-                :content="card.content"
-                @update-content="card.content = $event"
-                @hover-card="hoverCard"
-                @connect-cards="connectCards(card)"
-                @prepare-connect-card="prepareConnectCard"
-                @delete-card="deleteCard"
-            ></goalie-card>
-        </div>
-        <div class="column">
-            <h2 class="title">Users <button @click="addCard(2)" class="button is-pulled-right">Add User</button></h2>
-            <goalie-card
-                v-for="card in users"
-                :key="card.id"
-                :id="card.id"
-                :content="card.content"
-                @update-content="card.content = $event"
-                @hover-card="hoverCard"
-                @connect-cards="connectCards(card)"
-                @prepare-connect-card="prepareConnectCard"
-                @delete-card="deleteCard"
-            ></goalie-card>
-        </div>
-        <div class="column">
-            <h2 class="title">User goals <button @click="addCard(3)" class="button is-pulled-right">Add User goal</button></h2>
-            <goalie-card
-                v-for="card in user_goals"
-                :key="card.id"
-                :id="card.id"
-                :content="card.content"
-                @update-content="card.content = $event"
-                @hover-card="hoverCard"
-                @connect-cards="connectCards(card)"
-                @prepare-connect-card="prepareConnectCard"
-                @delete-card="deleteCard"
-            ></goalie-card>
-        </div>
-        <div class="column">
-            <h2 class="title">Actions <button @click="addCard(4)" class="button is-pulled-right">Add Action</button></h2>
-            <goalie-card
-                v-for="card in actions"
-                :key="card.id"
-                :id="card.id"
-                :content="card.content"
-                @update-content="card.content = $event"
-                @hover-card="hoverCard"
-                @connect-cards="connectCards(card)"
-                @prepare-connect-card="prepareConnectCard"
-                @delete-card="deleteCard"
-            ></goalie-card>
-        </div>
+        <goalie-column id="1" title="Goals" button-text="Add goal"
+            @add-card="addCard(1)">
+            <transition-group name="card" tag="div">
+                <goalie-card
+                    v-for="card in goals"
+                    :key="card.id"
+                    :id="card.id"
+                    :content="card.content"
+                    @update-content="card.content = $event"
+                    @hover-card="hoverCard"
+                    @connect-cards="connectCards(card)"
+                    @prepare-connect-card="prepareConnectCard"
+                    @delete-card="deleteCard"></goalie-card>
+            </transition-group>
+        </goalie-column>
+        <goalie-column id="2" title="Users" button-text="Add user"
+            @add-card="addCard(2)">
+            <transition-group name="card" tag="div">
+                <goalie-card
+                    v-for="card in users"
+                    :key="card.id"
+                    :id="card.id"
+                    :content="card.content"
+                    @update-content="card.content = $event"
+                    @hover-card="hoverCard"
+                    @connect-cards="connectCards(card)"
+                    @prepare-connect-card="prepareConnectCard"
+                    @delete-card="deleteCard"></goalie-card>
+            </transition-group>
+        </goalie-column>
+        <goalie-column id="3" title="User goals" button-text="Add user goal"
+            @add-card="addCard(3)">
+            <transition-group name="card" tag="div">
+                <goalie-card
+                    v-for="card in user_goals"
+                    :key="card.id"
+                    :id="card.id"
+                    :content="card.content"
+                    @update-content="card.content = $event"
+                    @hover-card="hoverCard"
+                    @connect-cards="connectCards(card)"
+                    @prepare-connect-card="prepareConnectCard"
+                    @delete-card="deleteCard"></goalie-card>
+            </transition-group>
+        </goalie-column>
+        <goalie-column id="4" title="Actions" button-text="Add action"
+            @add-card="addCard(4)">
+            <transition-group name="card" tag="div">
+                <goalie-card
+                    v-for="card in actions"
+                    :key="card.id"
+                    :id="card.id"
+                    :content="card.content"
+                    @update-content="card.content = $event"
+                    @hover-card="hoverCard"
+                    @connect-cards="connectCards(card)"
+                    @prepare-connect-card="prepareConnectCard"
+                    @delete-card="deleteCard"></goalie-card>
+            </transition-group>
+        </goalie-column>
     </div>
 </template>
 
 <script>
+import GoalieColumn from './components/GoalieColumn.vue'
 import GoalieCard from './components/GoalieCard.vue'
 
 export default {
     name: 'app',
     components: {
-        GoalieCard
+        GoalieColumn,
+        GoalieCard,
     },
     data() {
         return {
@@ -100,9 +106,16 @@ export default {
         },
     },
     mounted() {
-        if (localStorage.getItem('goalie_cards') && localStorage.getItem('goalie_connections')) {
+        if (localStorage.getItem('goalie_cards')) {
             this.cards = JSON.parse(localStorage.getItem('goalie_cards'));
+        } else {
+            this.cards = []
+        }
+
+        if (localStorage.getItem('goalie_connections')) {
             this.connections = JSON.parse(localStorage.getItem('goalie_connections'));
+        } else {
+            this.connections = []
         }
     },
     methods: {
@@ -117,7 +130,7 @@ export default {
                 id: this.guidGenerator(),
                 column: id,
                 content: 'Edit me…',
-                // TODO: weight: 0 - how to calculate and sort byt this?
+                // TODO: weight: 0 - how to calculate and sort by this?
             })
         },
         getCardConnections(id) {
@@ -137,7 +150,6 @@ export default {
             let matches2 = this.connections.findIndex(connection => ((connection.to === thisCard) && (connection.from === targetCard)))
 
             if (this.isValidConnection) {
-                    console.log("connection before", this.connections)
                 if ((matches > -1) && (matches2 > -1)) {
                     // Connection exists already, exclude from-to pair from (new) connections array
                     this.connections.splice(matches, 1);
@@ -147,16 +159,22 @@ export default {
                     this.connections.push({from: thisCard, to: targetCard})
                     this.connections.push({from: targetCard, to: thisCard})
                 }
-                    console.log("connection after", this.connections)
             }
         },
         deleteCard(id) {
+            let thisCard = id
+
             // Remove this card
             let thisIndex = this.cards.findIndex(card => card.id === id)
             this.cards.splice(thisIndex, 1)
 
             // Remove all its connections
-            this.connections = this.connections.filter(cardPair => (cardPair.from !== id || cardPair.to !== id))
+            let matches = this.connections.findIndex(connection => connection.from === thisCard)
+            let matches2 = this.connections.findIndex(connection => connection.to === thisCard)
+            if ((matches > -1) && (matches2 > -1)) {
+                this.connections.splice(matches, 1);
+                this.connections.splice(matches2, 1);
+            }
         },
         hoverCard(data) {
             // Check if data is real data (contains an id) or not (otherwise it's an [e.g. mouseleave] event)
@@ -173,13 +191,14 @@ export default {
                     var targetCardId = targetCard.to
 
                     if (targetCardId) {
-                        var cardDOM = document.getElementById(this.cards.filter(card => card.id === targetCardId)[0].id)
+                        // TODO: Get rid of DOM sniffing here? Lookup card dimensions of each target card?
+                        var cardDOM = document.getElementById(this.cards.filter(card => card.id === targetCardId)[0].id) || app
 
                         arr.push({
                             x1: x1,
                             y1: y1,
-                            x2: cardDOM.offsetLeft + (cardDOM.offsetWidth / 2),
-                            y2: cardDOM.offsetTop + (cardDOM.offsetHeight / 2)
+                            x2: cardDOM.getBoundingClientRect().left + (cardDOM.offsetWidth / 2),
+                            y2: cardDOM.getBoundingClientRect().top + (cardDOM.offsetHeight / 2)
                         })
                     }
                 })
@@ -207,8 +226,31 @@ export default {
 </script>
 
 <style>
-#app {
-    padding: 20px;
+html {
+    background-color: #fff;
+    font-size: 16px;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    color: #4a4a4a;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: 'Vesper Libre', Georgia, serif;
+}
+
+h1, h2, h3 {
+    margin: 0;
+    outline: none;
 }
 
 #canvas {
@@ -221,18 +263,21 @@ export default {
     opacity: 0.5;
 }
 
-.card + .card {
-	margin-top: 20px  
+.card-move {
+    transition: transform 0.5s ease-in-out;
 }
 
-.drag, .drop {
-    position: relative;
+.card-leave {
+    transition: transform 0.5s ease-out;
 }
 
-.drag {
+.card-enter,
+.card-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.card-leave-active {
     position: absolute;
-    top: 0;
-    padding: 3px;
-    cursor: move;
 }
 </style>

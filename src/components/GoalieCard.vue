@@ -8,15 +8,15 @@
             @dragenter="to = id; handleEnter(to)"
             @dragover="over = true"
             @dragleave="over = false"
-            @drop="handleDrop(to)">
-            <div class="card-content">
-                <button class="delete is-pulled-right" @click="deleteCard(id)"></button>
-                <p class="subtitle" contenteditable="true" @input="updateContent"></p>
-            </div>
+            @drop="handleDrop()">
             <drag class="drag"
                 :effect-allowed="['link']"
-                @dragstart="handleStart(id);"
-            >🔗</drag>
+                @dragstart="handleStart(id);">
+                <div class="card__content">
+                    <button class="button button--delete float-right" @click="deleteCard(id)"></button>
+                    <h3 class="card__title" contenteditable="true" @input="updateContent"></h3>
+                </div>
+            </drag>
         </drop>
     </div>
 </template>
@@ -45,13 +45,13 @@ export default {
             return {
                 width: this.$el.offsetWidth,
                 height: this.$el.offsetHeight,
-                top: this.$el.offsetTop,
-                left: this.$el.offsetLeft,
+                top: this.$el.getBoundingClientRect().top,
+                left: this.$el.getBoundingClientRect().left,
             }
         }
     },
     mounted() {
-        this.$el.querySelector('.subtitle').innerText = this.content
+        this.$el.querySelector('h3').innerText = this.content
     },
     methods: {
         handleStart(id) {
@@ -60,7 +60,7 @@ export default {
         handleEnter(id) {
             this.$emit('prepare-connect-card', {to: id})
         },
-        handleDrop(id) {
+        handleDrop() {
             this.over = false
             this.$emit('connect-cards')
         },
@@ -79,10 +79,90 @@ export default {
 
 <style>
 .card {
-    background: rgba(245, 245, 245, 0.75)
+    width: 100%;
+    margin: 20px 0 0;
+    color: #4a4a4a;
+    transition: all 0.5s ease-in-out;
+}
+
+.card__title {
+    color: #4a4a4a;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+.card__content {
+    margin: 0 10px;
+    background: rgba(245, 245, 245, 0.75);
+    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
+    padding: 1.5rem;
+}
+
+.button {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: none;
+}
+
+.button--delete {
+    background-color: rgba(10,10,10,.2);
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    display: inline-block;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-size: 0;
+    height: 20px;
+    max-height: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    min-width: 20px;
+    outline: 0;
+    position: relative;
+    vertical-align: top;
+    width: 20px
+}
+
+.button--delete::after,
+.button--delete::before {
+    background-color: #fff;
+    content: "";
+    display: block;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    -webkit-transform-origin: center center;
+    transform-origin: center center
+}
+
+.button--delete::before {
+    height: 2px;
+    width: 50%
+}
+
+.button--delete::after {
+    height: 50%;
+    width: 2px
+}
+
+.button--delete:focus,
+.button--delete:hover {
+    background-color: rgba(10,10,10,.3)
+}
+
+.button--delete:active {
+    background-color: rgba(10,10,10,.4)
+}
+
+.float-right {
+    float: right;
 }
 
 .drop.over {
-    background: rgba(255, 255, 235, 0.75)
+    background: rgba(255, 255, 235, 1)
 }
 </style>
