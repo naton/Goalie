@@ -66,23 +66,49 @@
                     @delete-card="deleteCard"></goalie-card>
             </transition-group>
         </goalie-column>
+        <goalie-login title="Log in using your Google account" button-text="Log in"
+            :update-login-status="setLoginStatus" v-show="!loginStatus"></goalie-login>
     </div>
 </template>
 
 <script>
+import GoalieLogin from './components/GoalieLogin.vue'
 import GoalieColumn from './components/GoalieColumn.vue'
 import GoalieCard from './components/GoalieCard.vue'
+import { cardsRef, connectionsRef, currentUser } from './firebaseConfig.js'
+// import { mapState } from 'vuex'
 
 export default {
     name: 'app',
     components: {
+        GoalieLogin,
         GoalieColumn,
         GoalieCard,
+    },
+    firebase: {
+        cards: {
+            source: cardsRef,
+            // optionally provide the cancelCallback
+            cancelCallback: function () {},
+            // this is called once the data has been retrieved from firebase
+            readyCallback: function () {
+                console.log('loaded cards from firebase!')
+            }
+        },
+        connections: {
+            source: connectionsRef,
+            // optionally provide the cancelCallback
+            cancelCallback: function () {},
+            // this is called once the data has been retrieved from firebase
+            readyCallback: function () {}
+        }
     },
     data() {
         return {
             cards: [],
             connections: [],
+            loginStatus: false,
+            token: localStorage.getItem('goalie_usertoken') || '',
             from: null,
             to: null,
             drawLinesTo: [],
@@ -103,7 +129,7 @@ export default {
         },
         isValidConnection() {
             return (this.from && this.to && (this.from !== this.to))
-        },
+        }
     },
     mounted() {
         if (localStorage.getItem('goalie_cards')) {
@@ -125,11 +151,33 @@ export default {
             };
             return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
         },
+        setLoginStatus: function (value) {
+           this.loginStatus = value
+        },
         addCard(id) {
-            this.cards.push({
+            // fb.cardsRef.add({
+            //     id: this.guidGenerator(),
+            //     column: id,
+            //     createdOn: new Date(),
+            //     content: 'Edit mee…',
+            //     userId: this.currentUser.uid,
+            //     userName: this.userProfile.name
+            // }).then(ref => {
+            //     console.log('Success!')
+            // }).catch(err => {
+            //     console.log(err)
+            // })
+
+            // TODO: Why undefined here?!
+            console.log("This user:",this.currentUser);
+
+            this.$firebaseRefs.cards.push({
                 id: this.guidGenerator(),
                 column: id,
-                content: 'Edit me…',
+                createdOn: new Date(),
+                content: 'Edit mee…',
+                userId: this.currentUser.uid,
+                userName: this.userProfile.name
                 // TODO: weight: 0 - how to calculate and sort by this?
             })
         },
@@ -287,9 +335,9 @@ h1, h2, h3 {
 
 .card-enter,
 .card-leave-to {
+}
     opacity: 0;
     transform: translateX(30px);
-}
 
 .card-leave-active {
     position: absolute;

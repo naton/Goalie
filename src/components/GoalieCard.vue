@@ -29,7 +29,10 @@ export default {
     props: {
         id: String,
         column: Number,
+        createdOn: Date,
         content: String,
+        userId: String,
+        userName: String
     },
     components: {
         Drag,

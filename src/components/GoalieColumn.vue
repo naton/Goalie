@@ -1,5 +1,4 @@
 <template>
-    <!-- section class="column" :scroll="handleScroll" -->
     <section class="column">
         <h1 class="column__title">{{ title }} <button @click="handleClick(id)" class="button float-right">{{ buttonText }}</button></h1>
         <slot></slot>
@@ -17,17 +16,8 @@ export default {
     methods: {
         handleClick(id) {
             this.$emit('add-card', id)
-        },
-        // handleScroll() {
-        //     app.drawLinesTo = []
-        // }
-    },
-    // mounted () {
-    //     this.$el.addEventListener('scroll', this.handleScroll);
-    // },
-    // destroyed () {
-    //     this.$el.removeEventListener('scroll', this.handleScroll);
-    // }
+        }
+    }
 }
 </script>
 
