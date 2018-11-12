@@ -83,23 +83,23 @@ export default {
 <style>
 .card {
     width: 100%;
-    margin: 20px 0 0;
-    color: #4a4a4a;
+    margin: 1.5em 0 0;
+    color: #223;
+    font-size: 1rem;
     transition: all 0.5s ease-in-out;
 }
 
 .card__title {
-    color: #4a4a4a;
-    font-size: 1.25rem;
     font-weight: 400;
     line-height: 1.25;
 }
 
 .card__content {
-    margin: 0 10px;
-    background: rgba(245, 245, 245, 0.75);
-    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
-    padding: 1.5rem;
+    margin: 0 1em;
+    padding: 1.25em;
+    border-radius: 10px;
+    background: rgba(250, 250, 250, 0.9);
+    box-shadow: 0 1px 2px rgba(10, 10, 10, .2);
 }
 
 .button {
@@ -108,8 +108,16 @@ export default {
     border: none;
 }
 
+.button--add {
+    padding: 0.6em 0.8em;
+    font-size: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(10, 10, 10, .2);
+}
+
+.button__icon--add,
 .button--delete {
-    background-color: rgba(10,10,10,.2);
+    background-color: rgba(10, 10, 10, .2);
     border-radius: 50%;
     cursor: pointer;
     pointer-events: auto;
@@ -128,6 +136,12 @@ export default {
     width: 20px
 }
 
+.button__icon--add {
+    margin-right: 10px;
+}
+
+.button__icon--add::after,
+.button__icon--add::before,
 .button--delete::after,
 .button--delete::before {
     background-color: #fff;
@@ -142,19 +156,33 @@ export default {
     transform-origin: center center
 }
 
+.button__icon--add::after,
+.button__icon--add::before {
+    -webkit-transform: translateX(-50%) translateY(-50%) rotate(0);
+    transform: translateX(-50%) translateY(-50%) rotate(0);
+}
+
+
+.button__icon--add::before,
 .button--delete::before {
     height: 2px;
     width: 50%
 }
 
+.button__icon--add::after,
 .button--delete::after {
     height: 50%;
     width: 2px
 }
 
+.button__icon--add:focus,
+.button__icon--add:hover {
+    background-color: rgba(10, 150, 10, .3)
+}
+
 .button--delete:focus,
 .button--delete:hover {
-    background-color: rgba(10,10,10,.3)
+    background-color: rgba(150, 10, 10, .3)
 }
 
 .button--delete:active {

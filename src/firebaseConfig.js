@@ -14,19 +14,50 @@ const config = {
 const firebaseApp = firebase.initializeApp(config)
 const db = firebaseApp.database()
 const auth = firebase.auth()
-auth.useDeviceLanguage();
-const currentUser = auth.currentUser
+auth.useDeviceLanguage()
 const usersRef = db.ref('users')
 const cardsRef = db.ref('cards')
-const connectionsRef = db.ref('connections')
+const relationsRef = db.ref('relations')
 const provider = new firebase.auth.GoogleAuthProvider()
 
 export {
     db,
     auth,
-    currentUser,
     usersRef,
     cardsRef,
-    connectionsRef,
+    relationsRef,
     provider
 }
+
+/* Ideas:
+
+boards
+    /bid
+        id: bid
+        /cards ?
+            /cid
+            …
+
+cards
+    /cid
+        id: cid
+        column: int
+        content: text
+
+users
+    /uid
+        created: date
+        name: name
+        email: email
+        …
+
+relations
+    /rid
+        from: cid
+        to: cid
+
+userboards:
+    /uid
+        id: bid
+
+*/

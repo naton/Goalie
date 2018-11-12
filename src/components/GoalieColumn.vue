@@ -1,6 +1,6 @@
 <template>
     <section class="column">
-        <h1 class="column__title">{{ title }} <button @click="handleClick(id)" class="button float-right">{{ buttonText }}</button></h1>
+        <h1 class="column__title">{{ title }} <button @click="handleClick(id)" class="button button--add float-right"><span class="button__icon--add"></span>{{ buttonText }}</button></h1>
         <slot></slot>
     </section>
 </template>

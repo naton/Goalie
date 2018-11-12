@@ -1,5 +1,5 @@
 <template>
-    <section class="login">
+    <section class="login" v-show="!loginStatus">
         <div>
             <h2>{{ title }}</h2>
             <div>
@@ -10,25 +10,27 @@
 </template>
 
 <script>
-import { auth, provider } from '../firebaseConfig.js'
+import { db, auth, provider } from '../firebaseConfig.js'
 
 export default {
     name: 'GoalieLogin',
     props: {
         title: String,
-        buttonText: String
+        buttonText: String,
+        initialLoginStatus: Boolean
     },
     data() {
         return {
             user: null,
             isNewUser: true,
             isLoading: false,
-            loginStatus: false
+            loginStatus: this.initialLoginStatus
         }
     },
     methods: {
-        handleLoginStatus(value) {
-           this.$emit('update-login-status', value);
+        handleLoginStatus(bool, user) {
+           this.loginStatus = bool;
+           this.$emit('update-login-status', user)
         },
         login() {
             let self = this
@@ -37,19 +39,15 @@ export default {
 
             auth.signInWithPopup(provider).then(function(result) {
                 // This gives you a Google Access Token. You can use it to access the Google API.
-                // let token = result.credential.accessToken;
-                // this.$store.commit('setCurrentUser', result.user)
-                // this.$store.dispatch('fetchUserProfile')
                 localStorage.setItem('goalie_usertoken', result.credential.accessToken)
-                self.handleLoginStatus(true)
-                self.loginStatus = true
                 self.user = result.user
+                self.handleLoginStatus(true, self.user)
                 self.isNewUser = result.additionalUserInfo.isNewUser
                 self.isLoading = false
             }).catch(function(error) {
                 console.log(error)
                 localStorage.removeItem('goalie_usertoken')
-                self.loginStatus = false
+                self.handleLoginStatus(false, null)
                 self.isLoading = false
             });
         }

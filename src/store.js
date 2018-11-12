@@ -1,15 +1,35 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import './firebaseConfig.js'
+import { auth } from './firebaseConfig.js'
 
 Vue.use(Vuex)
 
-// handle page reload
-auth.onAuthStateChanged(user => {
-    if (user) {
-        store.commit('setCurrentUser', user)
-        store.dispatch('fetchUserProfile')
+export const store = new Vuex.Store({
+    state: {
+        user: null,
+        cards: [],
+        relations: []
+    },
+    getters: {
+        getUser: state => {
+            return state.user;
+        }
+    },
+    mutations: {
+        setUser: state => {
+            state.user = auth.currentUser;
+        }
+    },
+    actions: {
+        setUser: context => {
+            context.commit('setUser');
+        }
+    }
+});
 
+// handle page reload
+// auth.onAuthStateChanged(user => {
+//     if (user) {
         // usersRef.doc(user.uid).onSnapshot(doc => {
         //     store.commit('setUserProfile', doc.data())
         // })
@@ -33,51 +53,6 @@ auth.onAuthStateChanged(user => {
 
         //     store.commit('setCards', cardsArray)
         // })
-    }
-})
+//     }
+// })
 
-export const store = new Vuex.Store({
-    state: {
-        currentUser: null,
-        userProfile: {},
-        cards: [],
-        connections: []
-    },
-    actions: {
-        clearData({ commit }) {
-            commit('setCurrentUser', null)
-            commit('setUserProfile', {})
-            commit('setCards', null)
-            commit('setConnections', null)
-        },
-        fetchUserProfile({ commit, state }) {
-            // usersRef.doc(state.currentUser.uid).get().then(res => {
-            //     commit('setUserProfile', res.data())
-            // }).catch(err => {
-            //     console.log(err)
-            // })
-        }
-    },
-    mutations: {
-        setCurrentUser(state, val) {
-            state.currentUser = val
-        },
-        setUserProfile(state, val) {
-            state.userProfile = val
-        },
-        setCards(state, val) {
-            if (val) {
-                state.cards = val
-            } else {
-                state.cards = []
-            }
-        },
-        setConnections(state, val) {
-            if (val) {
-                state.connections = val
-            } else {
-                state.connections = []
-            }
-        }
-    }
-})
